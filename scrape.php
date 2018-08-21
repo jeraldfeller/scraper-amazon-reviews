@@ -21,7 +21,7 @@ foreach($asins as $row){
                 if($reviewLinkNode){
                     try{
                         $href = $reviewLinkNode->getAttribute('href');
-                        $reviewLink = "https://www.amazon.$locale.$href&sortBy=recent";
+                        $reviewLink = 'https://www.amazon.'.$locale.$href.'&sortBy=recent';
                         $scraper->insertAsinLink($id, $reviewLink);
                     }catch(Exception $e) { // I guess its InvalidArgumentException in this case
                         // Node list is empty
