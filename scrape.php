@@ -48,7 +48,7 @@ foreach($asins as $row){
                 echo 'Review count: ' . $totalReviewCount. "\n";
                 // get reviews
                 $reviews = array();
-                $list = $html->find('##cm_cr-review_list', 0)->find('.review');
+                $list = $html->find('#cm_cr-review_list', 0)->find('.review');
                 for($x = 0; $x < count($list); $x++){
                     $reviewId = $list[$x]->getAttribute('id');
                     $rating = $list[$x]->find('.review-rating', 0)->plaintext;

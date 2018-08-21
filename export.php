@@ -7,7 +7,7 @@ $export = $scraper->exportReviews();
 
 
 $date = date('Y-m-d_H-i-s');
-$csv = 'review-'.$date.'.csv';
+$csv = ROOT_DIR.'review-'.$date.'.csv';
 $data[] = implode('","', array(
     'Date Time',
     'Review ID',
