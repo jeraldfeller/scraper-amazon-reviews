@@ -28,7 +28,7 @@ class Scraper
     public function exportInputs(){
         $pdo = $this->getPdo();
         $sql = 'SELECT `asin`, `brand`
-                FROM `asins` WHERE ORDER BY `id` DESC';
+                FROM `asins` ORDER BY `id` DESC';
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         $result = array();
