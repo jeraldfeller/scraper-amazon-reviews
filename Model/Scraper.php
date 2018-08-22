@@ -25,20 +25,34 @@ class Scraper
         return $result;
     }
 
-    public function insertAsin($asin){
+    public function exportInputs(){
+        $pdo = $this->getPdo();
+        $sql = 'SELECT `asin`, `brand`
+                FROM `asins` WHERE ORDER BY `id` DESC';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $result = array();
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = $row;
+        }
+        $pdo = null;
+        return $result;
+    }
+
+    public function insertAsin($asin, $brand, $client){
         $pdo = $this->getPdo();
         $sql = 'SELECT count(`id`) AS rowCount FROM `asins` WHERE `asin` = "'.$asin.'"';
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         if($stmt->fetch(PDO::FETCH_ASSOC)['rowCount'] == 0){
-            $sql = 'INSERT INTO `asins` SET `asin` = "'.$asin.'", `status` = 0';
+            $sql = 'INSERT INTO `asins` SET `asin` = "'.$asin.'", `brand` = "'.$brand.'", `client` = "'.$client.'", `status` = 0';
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
         }
         $pdo = null;
     }
 
-    public function getAsins($offset = 0, $limit = 1){
+    public function getAsins($offset = 0, $limit = 10){
         $pdo = $this->getPdo();
         $sql = 'SELECT * FROM `asins` WHERE `status` = 0 ORDER BY id ASC LIMIT '.$offset.','.$limit;
         $stmt = $pdo->prepare($sql);
@@ -77,7 +91,9 @@ class Scraper
                 "'.$data[$x][5].'",
                 "'.$data[$x][6].'",
                 "'.$data[$x][7].'",
-                "'.$data[$x][8].'"
+                "'.$data[$x][8].'",
+                "'.$data[$x][9].'",
+                "'.$data[$x][10].'"
                 )';
             }else{
                 $values .= '('.$data[$x][0].',
@@ -89,13 +105,15 @@ class Scraper
                 "'.$data[$x][5].'",
                 "'.$data[$x][6].'",
                 "'.$data[$x][7].'",
-                "'.$data[$x][8].'"
+                "'.$data[$x][8].'",
+                "'.$data[$x][9].'",
+                "'.$data[$x][10].'"
                 ),';
             }
         }
 
         $sql = 'INSERT INTO `reviews`
-                  (`asins_id`, `item_asin`, `status`, `review_id`, `review_star_rating`, `review_title`, `review_author`, `review_date`, `review_body`, `date_created`)
+                  (`asins_id`, `item_asin`, `status`, `review_id`, `review_star_rating`, `review_title`, `review_author`, `review_date`, `review_body`, `date_created`, `brand`, `client`)
                 VALUES '.$values.'
                ';
 
@@ -104,6 +122,17 @@ class Scraper
         $stmt->execute();
         $pdo = null;
         return true;
+    }
+
+    function checkReviewId($reviewId){
+        $pdo = $this->getPdo();
+        $sql = 'SELECT count(`id`) as matchCount FROM `reviews` WHERE `review_id` = "'.$reviewId.'"';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $count = $stmt->fetch(PDO::FETCH_ASSOC)['matchCount'];
+        $pdo = null;
+
+        return $count;
     }
 
     public function updateTotalReviewCount($id, $locale, $count){

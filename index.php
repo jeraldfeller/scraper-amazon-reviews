@@ -12,9 +12,9 @@
             <h1>Amazon Review Scraper</h1>
         </div>
         <div class="col-md-12 text-center">
-            <a class="btn btn-success btn-lg" href="export.php">Export Data</a>
+            <a class="btn btn-success btn-lg" href="export.php?action=reviews">Export Data</a>
+            <a class="btn btn-success btn-lg" href="export.php?action=inputs">Export Inputs</a>
         </div>
-
         <div class="col-md-12 text-center">
             <hr>
             <form id="form">

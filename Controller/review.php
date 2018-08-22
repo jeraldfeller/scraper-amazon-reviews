@@ -17,7 +17,9 @@ switch ($_GET['action']){
                         continue;
                     }
                     $asin = $data[0];
-                    $scraper->insertAsin($asin);
+                    $client = $data[1];
+                    $brand = $data[2];
+                    $scraper->insertAsin($asin, $brand, $client);
                 }
 
                 fclose($fileHandle);
