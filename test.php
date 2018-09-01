@@ -7,63 +7,18 @@ $locale = 'it';
 $reviewLocale = '';
 $asins = $scraper->getAsins();
 $dateNow = date('Y-m-d');
-foreach($asins as $row){
-    $id = $row['id'];
-    $asin = $row['asin'];
-    $brand = $row['brand'];
-    $client = $row['client'];
+
+    $id = 1;
+    $asin = 'B071YLSQDN';
+    $brand = 'brand';
+    $client = 'client';
     $url = "https://www.amazon.$locale/dp/$asin";
     $reviewLink = $row['asin_review_url'];
     $continue = true;
-    if ($reviewLink == '' || $reviewLink == null) {
-        $htmlData = $scraper->curlTo($url);
-        if ($htmlData['html']) {
-            $html = str_get_html($htmlData['html']);
-            if($html){
-                $reviewLinkNode = $html->find('#dp-summary-see-all-reviews', 0);
-                if($reviewLinkNode){
-                    try{
-                        $href = $reviewLinkNode->getAttribute('href');
-                        $reviewLink = 'https://www.amazon.'.$locale.$href.'&sortBy=recent';
-                        echo $href . "\n";
-                        $scraper->insertAsinLink($id, $reviewLink);
-                    }catch(Exception $e) { // I guess its InvalidArgumentException in this case
-                        // Node list is empty
-                        echo $e . "\n";
-                        $continue = false;
-                    }
-                }else{
-                    $reviewListContainer = $html->find('#cr-medley-cmps-wrapper', 0);
-                    if($reviewListContainer){
-                        $reviewHead = $reviewListContainer->find('#reviews-medley-cmps-expand-head', 0);
-                        if($reviewHead){
-                            $reviewLinkNode = $reviewListContainer->find('.a-link-child', 0);
-                            if($reviewLinkNode){
-                                try{
-                                    $href = $reviewLinkNode->getAttribute('href');
-                                    $reviewLink = $href.'&sortBy=recent';
-                                    $scraper->insertAsinLink($id, $reviewLink);
-                                }catch(Exception $e) { // I guess its InvalidArgumentException in this case
-                                    // Node list is empty
-                                    $continue = false;
-                                }
-                            }else{
-                                $continue = false;
-                            }
-                        }else{
-                            $continue = false;
-                        }
 
-                    }else{
-                        $continue = false;
-                    }
 
-                }
-            }
+    $reviewLink = 'https://www.amazon.it/Ringo-Pavesi-Cacao-confezioni-3-96kg/product-reviews/B071YLSQDN/ref=cm_cr_dp_d_show_all_top?ie=UTF8&reviewerType=all_reviews&sortBy=recent';
 
-        }
-    }
-    echo $reviewLink . "\n";
     $pg = 1;
     while ($continue == true) {
         // check review domain location
@@ -131,6 +86,7 @@ foreach($asins as $row){
                     }
 
                     if(count($reviews) > 0){
+                        var_dump($reviews);
                         $scraper->addReviews($id, $reviews);
                     }
 
@@ -147,7 +103,7 @@ foreach($asins as $row){
         sleep(mt_rand(1, 3));
     }
     sleep(mt_rand(1, 3));
-}
+
 
 
 function translateMonth($month, $locale){
@@ -156,7 +112,7 @@ function translateMonth($month, $locale){
             switch ($month){
                 case 'gennaio':
                     return 'january';
-                break;
+                    break;
                 case 'febbraio':
                     return 'february';
                     break;
@@ -191,6 +147,6 @@ function translateMonth($month, $locale){
                     return 'december';
                     break;
             }
-        break;
+            break;
     }
 }

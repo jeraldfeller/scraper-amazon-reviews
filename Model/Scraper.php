@@ -137,14 +137,26 @@ class Scraper
 
     public function updateTotalReviewCount($id, $locale, $count){
         $pdo = $this->getPdo();
-        $sql = 'SELECT count(id) as rowCount, id FROM `total_reviews` WHERE `asins_id` = '.$id.' AND `locale` = "'.$locale.'"';
+        $sql = 'SELECT id FROM `total_reviews` WHERE `asins_id` = '.$id.' AND `locale` = "'.$locale.'"';
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
-        if($row = $stmt->fetch(PDO::FETCH_ASSOC)['rowCount'] == 0){
-            $sql = 'INSERT INTO `total_reviews` SET `asins_id` = '.$id.', `locale` = "'.$locale.'", `total_review_count` = '.$count;
+        $result = $stmt->fetch(PDO::FETCH_ASSOC)['id'];
+
+        if($result > 0){
+            $sql = 'UPDATE  `total_reviews` SET `asins_id` = '.$id.', `locale` = "'.$locale.'", `total_review_count` = '.$count .' WHERE `id` = '.$result;
         }else{
-            $sql = 'UPDATE  `total_reviews` SET `asins_id` = '.$id.', `locale` = "'.$locale.'", `total_review_count` = '.$count .' WHERE `id` = '.$stmt->fetch(PDO::FETCH_ASSOC)['id'];
+            $sql = 'INSERT INTO `total_reviews` SET `asins_id` = '.$id.', `locale` = "'.$locale.'", `total_review_count` = '.$count;
         }
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $pdo = null;
+        return true;
+    }
+
+    public function reset(){
+        $pdo = $this->getPdo();
+        $sql = 'UPDATE `asins` SET `status` = 0';
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         $pdo = null;
@@ -153,22 +165,39 @@ class Scraper
 
     public function curlTo($url){
 
-        $port = '56362';
-        $proxy = array(
-            '79.137.58.75',
-            '79.137.58.84',
-            '79.137.58.87',
-            '79.137.58.88',
-            '185.246.212.227',
-            '185.246.213.219',
-            '185.246.214.221',
-            '185.246.215.224',
-            '78.157.195.45',
-            '78.157.203.174',
-            '5.101.144.109',
-            '78.157.202.192'
+        $port1 = '56362';
+        $port2 = '43848';
+        $proxy[] = array(
+            '213.184.110.82',
+            '213.184.112.53',
+            '213.184.114.168',
+            '213.184.114.175',
+            '196.16.224.156',
+            '196.16.224.158',
+            '196.16.224.168',
+            '196.16.224.170',
+            '196.16.246.146',
+            '196.16.246.147',
+            '196.16.246.157',
+            '196.16.246.99'
         );
-        $ip = $proxy[mt_rand(0,count($proxy) - 1)];
+        $proxy[] = array(
+            '213.184.109.142',
+            '213.184.110.15',
+            '213.184.112.145',
+            '213.184.114.178',
+            '196.16.224.25',
+            '196.16.246.29'
+        );
+
+        $proxyIndex = rand(0, 1);
+        if($proxyIndex == 0){
+            $port = $port1;
+        }else{
+            $port = $port2;
+        }
+
+        $ip = $proxy[$proxyIndex][mt_rand(0,count($proxy) - 1)];
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
